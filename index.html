@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0B0C0F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Plaza Don Adolfo</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ░░ PANTALLA 1 — LOGIN ░░ -->
+  <div id="screen-login" class="screen active">
+    <div class="screen-inner login-inner">
+      <div class="login-card">
+
+        <header class="brand-header brand-header--centered">
+          <div class="emblem">
+            <svg width="64" height="64" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="56" height="56" rx="12" stroke="#D4AF37" stroke-width="1.5"/>
+              <path d="M14 46 L14 28 A16 16 0 0 0 46 28 L46 46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <line x1="10" y1="46" x2="50" y2="46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="23" y="34" width="14" height="12" rx="3" stroke="#D4AF37" stroke-width="1" fill="none"/>
+              <circle cx="34" cy="40" r="1.5" fill="#D4AF37"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-plaza">PLAZA</span>
+            <span class="brand-name">Don Adolfo</span>
+          </div>
+        </header>
+
+        <form class="login-form" id="login-form" onsubmit="return false;">
+          <div class="input-group">
+            <label for="email">Correo</label>
+            <input type="email" id="email" placeholder="correo@ejemplo.com" autocomplete="email">
+          </div>
+          <div class="input-group">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button type="button" class="btn-enter" id="btn-login">Entrar</button>
+          <p class="login-error" id="login-error" role="alert" aria-live="polite"></p>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ PANTALLA 2 — PRINCIPAL ░░ -->
+  <div id="screen-main" class="screen">
+    <div class="screen-inner main-inner">
+
+      <header class="brand-header">
+        <div class="emblem">
+          <svg width="52" height="52" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="56" height="56" rx="12" stroke="#D4AF37" stroke-width="1.5"/>
+            <path d="M14 46 L14 28 A16 16 0 0 0 46 28 L46 46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <line x1="10" y1="46" x2="50" y2="46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="23" y="34" width="14" height="12" rx="3" stroke="#D4AF37" stroke-width="1" fill="none"/>
+            <circle cx="34" cy="40" r="1.5" fill="#D4AF37"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-plaza">PLAZA</span>
+          <span class="brand-name">Don Adolfo</span>
+        </div>
+        <div class="header-actions">
+          <button class="btn-logout btn-admin" id="btn-admin" type="button" aria-label="Administrar" hidden>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>Admin</span>
+          </button>
+          <button class="btn-logout btn-admin" id="btn-misalumnos" type="button" aria-label="Mis alumnos" hidden>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Alumnos</span>
+          </button>
+          <button class="btn-logout" id="btn-logout" type="button" aria-label="Cerrar sesión">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>Salir</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>Conectado</span>
+      </div>
+
+      <div class="action-list">
+
+        <!-- Puerta principal -->
+        <button class="action-btn action-btn--primary" id="btn-puerta" data-label="Abriendo puerta principal...">
+          <div class="action-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <circle cx="15" cy="12" r="1.2" fill="#D4AF37" stroke="none"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Puerta principal</span>
+            <span class="action-sub">Mantén presionado para abrir</span>
+          </div>
+          <div class="hold-ring" aria-hidden="true">
+            <svg viewBox="0 0 48 48" class="ring-svg">
+              <circle class="ring-track" cx="24" cy="24" r="19"/>
+              <circle class="ring-progress" cx="24" cy="24" r="19"/>
+            </svg>
+          </div>
+        </button>
+
+        <!-- Portón -->
+        <button class="action-btn action-btn--secondary" id="btn-porton" data-label="Abriendo portón...">
+          <div class="action-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B4B2AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="18" rx="2"/>
+              <line x1="12" y1="3" x2="12" y2="21"/>
+              <circle cx="7.5" cy="12" r="0.9" fill="#B4B2AA" stroke="none"/>
+              <circle cx="16.5" cy="12" r="0.9" fill="#B4B2AA" stroke="none"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Portón</span>
+            <span class="action-sub">Acceso vehicular</span>
+          </div>
+          <div class="hold-ring" aria-hidden="true">
+            <svg viewBox="0 0 48 48" class="ring-svg">
+              <circle class="ring-track" cx="24" cy="24" r="19"/>
+              <circle class="ring-progress" cx="24" cy="24" r="19"/>
+            </svg>
+          </div>
+        </button>
+
+        <!-- Alarma (deshabilitada) -->
+        <button class="action-btn action-btn--disabled" id="row-alarma" disabled>
+          <div class="action-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B4B2AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <div class="action-text">
+            <span class="action-title">Alarma</span>
+            <span class="action-sub">Disponible en fase 2</span>
+          </div>
+          <span class="badge-soon">Pronto</span>
+        </button>
+
+      </div>
+
+      <footer class="app-footer">DIAGONAL CATORCE</footer>
+
+    </div>
+  </div>
+
+  <!-- ░░ PANTALLA 3 — ADMINISTRACIÓN ░░ -->
+  <div id="screen-admin" class="screen">
+    <div class="screen-inner main-inner">
+
+      <header class="brand-header">
+        <div class="emblem">
+          <svg width="52" height="52" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="56" height="56" rx="12" stroke="#D4AF37" stroke-width="1.5"/>
+            <path d="M14 46 L14 28 A16 16 0 0 0 46 28 L46 46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <line x1="10" y1="46" x2="50" y2="46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="23" y="34" width="14" height="12" rx="3" stroke="#D4AF37" stroke-width="1" fill="none"/>
+            <circle cx="34" cy="40" r="1.5" fill="#D4AF37"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-plaza">PLAZA</span>
+          <span class="brand-name">Don Adolfo</span>
+        </div>
+        <button class="btn-logout" id="btn-admin-back" type="button" aria-label="Volver">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          <span>Volver</span>
+        </button>
+      </header>
+
+      <h1 class="admin-title">Administración</h1>
+
+      <button class="btn-enter admin-create-btn" id="btn-crear-usuario" type="button">+ Crear usuario</button>
+
+      <div class="user-list" id="user-list"></div>
+
+      <footer class="app-footer">DIAGONAL CATORCE</footer>
+
+    </div>
+  </div>
+
+  <!-- ░░ PANTALLA 4 — MIS ALUMNOS (locatario) ░░ -->
+  <div id="screen-misalumnos" class="screen">
+    <div class="screen-inner main-inner">
+
+      <header class="brand-header">
+        <div class="emblem">
+          <svg width="52" height="52" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="56" height="56" rx="12" stroke="#D4AF37" stroke-width="1.5"/>
+            <path d="M14 46 L14 28 A16 16 0 0 0 46 28 L46 46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <line x1="10" y1="46" x2="50" y2="46" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="23" y="34" width="14" height="12" rx="3" stroke="#D4AF37" stroke-width="1" fill="none"/>
+            <circle cx="34" cy="40" r="1.5" fill="#D4AF37"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-plaza">PLAZA</span>
+          <span class="brand-name">Don Adolfo</span>
+        </div>
+        <button class="btn-logout" id="btn-alumnos-back" type="button" aria-label="Volver">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          <span>Volver</span>
+        </button>
+      </header>
+
+      <h1 class="admin-title">Mis alumnos</h1>
+
+      <button class="btn-enter admin-create-btn" id="btn-crear-alumno" type="button">+ Crear alumno</button>
+
+      <div class="user-list" id="alumno-list"></div>
+
+      <footer class="app-footer">DIAGONAL CATORCE</footer>
+
+    </div>
+  </div>
+
+  <!-- ░░ MODAL — CREAR USUARIO ░░ -->
+  <div class="modal-overlay" id="modal-crear" hidden>
+    <div class="modal-card">
+      <h2 class="modal-title">Crear usuario</h2>
+      <form class="login-form" id="form-crear" onsubmit="return false;">
+        <div class="input-group">
+          <label for="nu-nombre">Nombre</label>
+          <input type="text" id="nu-nombre" placeholder="Nombre y apellido" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="nu-email">Correo</label>
+          <input type="email" id="nu-email" placeholder="correo@ejemplo.com" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="nu-pass">Contraseña temporal</label>
+          <div class="pass-row">
+            <input type="text" id="nu-pass" placeholder="Genera una segura" autocomplete="off">
+            <button type="button" class="btn-mini" id="nu-gen">Generar</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="nu-rol">Rol</label>
+          <select id="nu-rol"></select>
+        </div>
+
+        <!-- Switches de acceso: solo si rol = locatario -->
+        <div class="switch-group" id="nu-locatario-perms" hidden>
+          <p class="field-label">Accesos del locatario</p>
+          <label class="switch-row">
+            <span class="switch-text">Puerta principal</span>
+            <span class="switch"><input type="checkbox" id="sw-puerta"><span class="switch-slider"></span></span>
+          </label>
+          <label class="switch-row">
+            <span class="switch-text">Portón</span>
+            <span class="switch"><input type="checkbox" id="sw-porton"><span class="switch-slider"></span></span>
+          </label>
+          <label class="switch-row">
+            <span class="switch-text">Alarma</span>
+            <span class="switch"><input type="checkbox" id="sw-alarma"><span class="switch-slider"></span></span>
+          </label>
+          <label class="switch-row switch-row--sep">
+            <span class="switch-text">¿Puede invitar a sus alumnos al portón?</span>
+            <span class="switch"><input type="checkbox" id="sw-invitar"><span class="switch-slider"></span></span>
+          </label>
+        </div>
+
+        <!-- Locatario padre: solo si rol = alumno -->
+        <div class="input-group" id="nu-padre-group" hidden>
+          <label for="nu-padre">Locatario al que pertenece</label>
+          <select id="nu-padre"></select>
+        </div>
+
+        <div class="input-group">
+          <label for="nu-vigencia">Vigencia (opcional)</label>
+          <input type="date" id="nu-vigencia">
+        </div>
+
+        <p class="login-error" id="nu-error" role="alert" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="nu-cancelar">Cancelar</button>
+          <button type="button" class="btn-enter" id="nu-crear">Crear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ░░ MODAL — CREAR ALUMNO (locatario) ░░ -->
+  <div class="modal-overlay" id="modal-crear-alumno" hidden>
+    <div class="modal-card">
+      <h2 class="modal-title">Crear alumno</h2>
+      <form class="login-form" onsubmit="return false;">
+        <div class="input-group">
+          <label for="al-nombre">Nombre</label>
+          <input type="text" id="al-nombre" placeholder="Nombre y apellido" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="al-email">Correo</label>
+          <input type="email" id="al-email" placeholder="correo@ejemplo.com" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="al-pass">Contraseña temporal</label>
+          <div class="pass-row">
+            <input type="text" id="al-pass" placeholder="Genera una segura" autocomplete="off">
+            <button type="button" class="btn-mini" id="al-gen">Generar</button>
+          </div>
+        </div>
+
+        <!-- Switch de portón: solo si el locatario puede invitar -->
+        <div class="switch-group" id="al-porton-group" hidden>
+          <label class="switch-row">
+            <span class="switch-text">Acceso al portón</span>
+            <span class="switch"><input type="checkbox" id="sw-al-porton"><span class="switch-slider"></span></span>
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label for="al-vigencia">Vigencia (opcional)</label>
+          <input type="date" id="al-vigencia">
+        </div>
+
+        <p class="login-error" id="al-error" role="alert" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="al-cancelar">Cancelar</button>
+          <button type="button" class="btn-enter" id="al-crear">Crear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ░░ MODAL — ÉXITO + WHATSAPP ░░ -->
+  <div class="modal-overlay" id="modal-exito" hidden>
+    <div class="modal-card">
+      <h2 class="modal-title">Usuario creado</h2>
+      <p class="modal-text" id="exito-text"></p>
+      <div class="cred-box">
+        <div><span>Correo</span><strong id="exito-email"></strong></div>
+        <div><span>Contraseña</span><strong id="exito-pass"></strong></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="exito-cerrar">Cerrar</button>
+        <a class="btn-enter btn-wa" id="exito-wa" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ MODAL — VIGENCIA ░░ -->
+  <div class="modal-overlay" id="modal-vigencia" hidden>
+    <div class="modal-card">
+      <h2 class="modal-title">Vigencia</h2>
+      <p class="modal-text" id="vig-nombre"></p>
+      <div class="input-group">
+        <label for="vig-fecha">Fecha de vencimiento</label>
+        <input type="date" id="vig-fecha">
+      </div>
+      <p class="login-error" id="vig-error" role="alert" aria-live="polite"></p>
+      <div class="modal-actions modal-actions--col">
+        <button type="button" class="btn-enter" id="vig-guardar">Guardar fecha</button>
+        <button type="button" class="btn-ghost" id="vig-quitar">Quitar vigencia</button>
+        <button type="button" class="btn-ghost" id="vig-cancelar">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+    }
+  </script>
+</body>
+</html>

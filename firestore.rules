@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function meExiste() {
+      return signedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+    function miDoc() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+    function miRol() { return miDoc().rol; }
+    function isMaster() { return meExiste() && miRol() == 'master'; }
+    function isAdmin()  { return meExiste() && miRol() == 'admin'; }
+    function puedoInvitarPorton() {
+      return meExiste() && miDoc().get('puedeInvitarPorton', false) == true;
+    }
+
+    match /usuarios/{uid} {
+      allow read: if signedIn() && (
+        request.auth.uid == uid
+        || isMaster() || isAdmin()
+        || (meExiste() && miRol() == 'locatario' && resource.data.padreUid == request.auth.uid)
+      );
+
+      allow create: if isMaster()
+        || (isAdmin()
+            && request.resource.data.rol != 'master'
+            && request.resource.data.rol != 'admin')
+        || (meExiste() && miRol() == 'locatario'
+            && request.resource.data.rol == 'alumno'
+            && request.resource.data.padreUid == request.auth.uid
+            && request.resource.data.permisoAlarma == false
+            && (request.resource.data.permisoPorton == false || puedoInvitarPorton()));
+
+      allow update: if isMaster()
+        || (isAdmin()
+            && resource.data.rol != 'master' && resource.data.rol != 'admin'
+            && request.resource.data.rol != 'master' && request.resource.data.rol != 'admin')
+        || (meExiste() && miRol() == 'locatario'
+            && resource.data.padreUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['suspendido','vigencia']));
+
+      allow delete: if isMaster();
+    }
+
+    match /aperturas/{id} {
+      allow read: if isMaster() || isAdmin();
+      allow create, update, delete: if false;
+    }
+  }
+}
