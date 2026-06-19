@@ -42,7 +42,7 @@ const secondaryApp  = initializeApp(firebaseConfig, 'secondary');
 const secondaryAuth = getAuth(secondaryApp);
 
 // URL de la app para el mensaje de WhatsApp con el acceso del nuevo usuario.
-const APP_URL = "http://localhost:8000/"; // TODO: cambiar a la URL pública al publicar.
+const APP_URL = "https://racosta123.github.io/plazadonadolfo/"; // URL pública (GitHub Pages).
 
 // Datos del usuario SOLO en memoria, para decidir qué muestra la UI.
 // La seguridad real (quién puede leer/abrir) vive en las reglas de Firestore
