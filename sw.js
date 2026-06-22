@@ -1,5 +1,5 @@
-const CACHE = 'plaza-don-adolfo-v2';
-const PRECACHE = ['./', './index.html', './css/styles.css', './js/app.js', './manifest.json'];
+const CACHE = 'plaza-don-adolfo-v3';
+const PRECACHE = ['./', './index.html', './css/styles.css', './js/app.js', './manifest.json', './img/icon-192.png', './img/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)));
