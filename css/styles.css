@@ -629,6 +629,7 @@ body::before {
 .modal-actions--col { flex-direction: column; }
 .modal-actions .btn-enter,
 .modal-actions .btn-ghost,
+.modal-actions .btn-danger,
 .modal-actions .btn-wa { flex: 1; margin-top: 0; }
 
 .btn-ghost {
@@ -645,6 +646,22 @@ body::before {
 }
 .btn-ghost:hover  { background: rgba(255, 255, 255, 0.09); color: var(--text-main); }
 .btn-ghost:active { transform: scale(0.98); }
+
+/* Botón destructivo (confirmación de borrado) */
+.btn-danger {
+  padding: 15px;
+  background: rgba(229, 131, 127, 0.08);
+  border: 1px solid rgba(229, 131, 127, 0.55);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: #E5837F;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.12s;
+}
+.btn-danger:hover  { background: rgba(229, 131, 127, 0.15); }
+.btn-danger:active { background: rgba(229, 131, 127, 0.22); transform: scale(0.98); }
 
 .cred-box {
   background: rgba(255, 255, 255, 0.04);

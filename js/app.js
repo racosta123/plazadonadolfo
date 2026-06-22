@@ -337,12 +337,47 @@ const vigGuardar    = document.getElementById('vig-guardar');
 const vigQuitar     = document.getElementById('vig-quitar');
 const vigCancelar   = document.getElementById('vig-cancelar');
 
+// ─── Refs: modal confirmación (genérico, reemplaza el confirm() nativo) ─────────
+const modalConfirm = document.getElementById('modal-confirm');
+const confirmTitle = document.getElementById('confirm-title');
+const confirmText  = document.getElementById('confirm-text');
+const confirmYes   = document.getElementById('confirm-yes');
+const confirmNo    = document.getElementById('confirm-no');
+let   confirmResolver = null;
+
 // ─── Helpers de modales ─────────────────────────────────────────────────────────
 function openModal(el)  { if (el) el.hidden = false; }
 function closeModal(el) { if (el) el.hidden = true; }
 function closeAllModals() {
-  [modalCrear, modalAlumno, modalExito, modalVigencia].forEach(m => { if (m) m.hidden = true; });
+  [modalCrear, modalAlumno, modalExito, modalVigencia, modalConfirm].forEach(m => { if (m) m.hidden = true; });
+  if (confirmResolver) { confirmResolver(false); confirmResolver = null; }
 }
+
+// ─── Diálogo de confirmación propio (reemplaza el confirm() nativo del navegador) ─
+// Devuelve una Promise<boolean>: resuelve true si el usuario confirma, false si cancela.
+// Así evitamos el prefijo "<dominio> dice…" que el navegador agrega a confirm()/alert().
+function confirmar({ title = 'Confirmar', message = '', okText = 'Sí', cancelText = 'No', danger = false } = {}) {
+  confirmTitle.textContent = title;
+  confirmText.textContent  = message;
+  confirmYes.textContent   = okText;
+  confirmNo.textContent    = cancelText;
+  confirmYes.className      = danger ? 'btn-danger' : 'btn-enter';
+  openModal(modalConfirm);
+  return new Promise((resolve) => { confirmResolver = resolve; });
+}
+function resolverConfirm(value) {
+  closeModal(modalConfirm);
+  if (confirmResolver) { confirmResolver(value); confirmResolver = null; }
+}
+confirmYes.addEventListener('click', () => resolverConfirm(true));
+confirmNo.addEventListener('click',  () => resolverConfirm(false));
+modalConfirm.addEventListener('click', (e) => { if (e.target === modalConfirm) resolverConfirm(false); });
+// Soporte de teclado, igual que el confirm() nativo: Enter = Sí, Esc = No.
+document.addEventListener('keydown', (e) => {
+  if (modalConfirm.hidden) return;
+  if (e.key === 'Enter')       { e.preventDefault(); resolverConfirm(true);  }
+  else if (e.key === 'Escape') { e.preventDefault(); resolverConfirm(false); }
+});
 
 // ─── Helpers varios ─────────────────────────────────────────────────────────────
 function formatVigencia(ts) {
@@ -544,11 +579,14 @@ function buildAdminCard(u) {
 }
 
 async function borrarUsuario(u) {
-  const ok = confirm(
-    `¿Borrar a ${u.nombre || 'este usuario'}?\n\n` +
-    `Se elimina su ficha de Firestore. La cuenta de acceso (Auth) NO se borra ` +
-    `desde aquí; si hace falta, elimínala en la consola de Firebase.`
-  );
+  const ok = await confirmar({
+    title: 'Borrar usuario',
+    message: `¿Borrar a ${u.nombre || 'este usuario'}? Se elimina su ficha de Firestore. ` +
+             `La cuenta de acceso (Auth) NO se borra desde aquí; si hace falta, elimínala en la consola de Firebase.`,
+    okText: 'Sí, borrar',
+    cancelText: 'Cancelar',
+    danger: true
+  });
   if (!ok) return;
   try {
     await deleteDoc(doc(db, 'usuarios', u.uid));
