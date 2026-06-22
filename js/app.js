@@ -125,7 +125,7 @@ btnLogin.addEventListener('click', handleLogin);
 });
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
-btnLogout.addEventListener('click', () => { signOut(auth); });
+btnLogout.addEventListener('click', () => { signOut(auth); emailInput.value = ''; });
 
 // ─── Visibilidad por permisos (SOLO UI) ───────────────────────────────────────
 function applyRole(user) {
