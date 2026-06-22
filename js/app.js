@@ -254,7 +254,7 @@ class HoldButton {
     // TODO: el siguiente paso reemplaza esta alerta por la llamada al Worker
     // (que valida permisos + suspensión en el servidor antes de disparar el relé).
     const label = this.el.dataset.label || 'Abriendo...';
-    setTimeout(() => alert(label), 50);
+    setTimeout(() => mostrarToast(label), 50);
   }
 }
 
@@ -402,7 +402,7 @@ async function safeUpdate(uid, patch) {
     await updateDoc(doc(db, 'usuarios', uid), patch);
     // onSnapshot refresca la lista automáticamente.
   } catch (err) {
-    alert('No se pudo aplicar el cambio: ' + (err.code || err.message));
+    mostrarToast('No se pudo aplicar el cambio: ' + (err.code || err.message));
   }
 }
 
@@ -553,7 +553,7 @@ async function borrarUsuario(u) {
   try {
     await deleteDoc(doc(db, 'usuarios', u.uid));
   } catch (err) {
-    alert('No se pudo borrar: ' + (err.code || err.message));
+    mostrarToast('No se pudo borrar: ' + (err.code || err.message));
   }
 }
 
@@ -872,3 +872,76 @@ vigQuitar.addEventListener('click', async () => {
 });
 vigCancelar.addEventListener('click', () => closeModal(modalVigencia));
 modalVigencia.addEventListener('click', (e) => { if (e.target === modalVigencia) closeModal(modalVigencia); });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// UI: TOAST + INSTALACIÓN PWA
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Toast flotante (reemplaza alert): aparece abajo al centro y se desvanece solo (~2.5 s).
+function mostrarToast(mensaje) {
+  let cont = document.getElementById('toast-container');
+  if (!cont) {
+    cont = document.createElement('div');
+    cont.id = 'toast-container';
+    cont.className = 'toast-container';
+    document.body.appendChild(cont);
+  }
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = mensaje;
+  cont.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('toast--show'));
+  setTimeout(() => {
+    t.classList.remove('toast--show');
+    t.addEventListener('transitionend', () => t.remove(), { once: true });
+    setTimeout(() => { if (t.isConnected) t.remove(); }, 500); // respaldo si no hay transitionend
+  }, 2500);
+}
+
+// ─── Prompt de instalación de la PWA ───────────────────────────────────────────
+let deferredPrompt = null;
+const installBanner  = document.getElementById('install-banner');
+const installSub     = document.getElementById('install-banner-sub');
+const installAccept  = document.getElementById('install-accept');
+const installDismiss = document.getElementById('install-dismiss');
+
+function appInstalada() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function esIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function ocultarInstall() { if (installBanner) installBanner.hidden = true; }
+function mostrarInstall() { if (installBanner) installBanner.hidden = false; }
+
+// Chrome/Edge/Android: capturamos el evento y evitamos la barra nativa.
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (appInstalada()) return;
+  if (installAccept) installAccept.hidden = false;
+  if (installSub) installSub.textContent = 'Accedé más rápido desde tu pantalla de inicio.';
+  mostrarInstall();
+});
+
+if (installAccept) {
+  installAccept.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    ocultarInstall();
+    if (choice && choice.outcome === 'accepted') mostrarToast('Instalando Plaza Don Adolfo…');
+  });
+}
+if (installDismiss) installDismiss.addEventListener('click', ocultarInstall);
+
+// Si se instala (o ya está en standalone), ocultamos el aviso.
+window.addEventListener('appinstalled', () => { deferredPrompt = null; ocultarInstall(); });
+
+// iOS/Safari no dispara beforeinstallprompt → mostramos la nota de "Compartir".
+if (esIOS() && !appInstalada()) {
+  if (installAccept) installAccept.hidden = true;
+  if (installSub) installSub.textContent = 'Para instalar: Compartir → "Agregar a inicio".';
+  mostrarInstall();
+}
