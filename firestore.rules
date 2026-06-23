@@ -23,20 +23,25 @@ service cloud.firestore {
         || (meExiste() && miRol() == 'locatario' && resource.data.padreUid == request.auth.uid)
       );
 
-      allow create: if isMaster()
-        || (isAdmin()
-            && request.resource.data.rol != 'master'
-            && request.resource.data.rol != 'admin')
-        || (meExiste() && miRol() == 'locatario'
-            && request.resource.data.rol == 'alumno'
-            && request.resource.data.padreUid == request.auth.uid
-            && request.resource.data.permisoAlarma == false
-            && (request.resource.data.permisoPorton == false || puedoInvitarPorton()));
+      allow create: if request.resource.data.rol in ['master','admin','locatario','alumno']
+        && (
+          isMaster()
+          || (isAdmin()
+              && request.resource.data.rol != 'master'
+              && request.resource.data.rol != 'admin')
+          || (meExiste() && miRol() == 'locatario'
+              && request.resource.data.rol == 'alumno'
+              && request.resource.data.padreUid == request.auth.uid
+              && request.resource.data.permisoAlarma == false
+              && (request.resource.data.permisoPorton == false || puedoInvitarPorton()))
+        );
 
       allow update: if isMaster()
         || (isAdmin()
             && resource.data.rol != 'master' && resource.data.rol != 'admin'
-            && request.resource.data.rol != 'master' && request.resource.data.rol != 'admin')
+            && request.resource.data.rol != 'master' && request.resource.data.rol != 'admin'
+            && !request.resource.data.diff(resource.data).affectedKeys()
+                  .hasAny(['creadoEn','creadoPor','padreUid']))
         || (meExiste() && miRol() == 'locatario'
             && resource.data.padreUid == request.auth.uid
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['suspendido','vigencia']));
