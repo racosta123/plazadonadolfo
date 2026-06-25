@@ -148,8 +148,8 @@
           </div>
         </button>
 
-        <!-- Alarma (deshabilitada) -->
-        <button class="action-btn action-btn--disabled" id="row-alarma" disabled>
+        <!-- Alarma (interruptor) -->
+        <button class="action-btn action-btn--secondary" id="btn-alarma" aria-pressed="false">
           <div class="action-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B4B2AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -158,9 +158,14 @@
           </div>
           <div class="action-text">
             <span class="action-title">Alarma</span>
-            <span class="action-sub">Disponible en fase 2</span>
+            <span class="action-sub">Mantén presionado para activar o desactivar</span>
           </div>
-          <span class="badge-soon">Pronto</span>
+          <div class="hold-ring" aria-hidden="true">
+            <svg viewBox="0 0 48 48" class="ring-svg">
+              <circle class="ring-track" cx="24" cy="24" r="19"/>
+              <circle class="ring-progress" cx="24" cy="24" r="19"/>
+            </svg>
+          </div>
         </button>
 
       </div>

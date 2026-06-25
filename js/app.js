@@ -65,7 +65,7 @@ const btnAdmin      = document.getElementById('btn-admin');
 const btnMisAlumnos = document.getElementById('btn-misalumnos');
 const btnPuerta     = document.getElementById('btn-puerta');
 const rowPorton     = document.getElementById('btn-porton');
-const rowAlarma     = document.getElementById('row-alarma');
+const rowAlarma     = document.getElementById('btn-alarma');
 
 function setLoginError(msg) { loginError.textContent = msg || ''; }
 
@@ -130,7 +130,7 @@ btnLogout.addEventListener('click', () => { signOut(auth); emailInput.value = ''
 // ─── Visibilidad por permisos (SOLO UI) ───────────────────────────────────────
 function applyRole(user) {
   const esMA = (user.rol === 'master' || user.rol === 'admin');
-  // master/admin SIEMPRE ven los tres accesos (la alarma queda deshabilitada).
+  // master/admin SIEMPRE ven los tres accesos.
   btnPuerta.hidden = !(esMA || user.permisoPuerta === true);
   rowPorton.hidden = !(esMA || user.permisoPorton === true);
   rowAlarma.hidden = !(esMA || user.permisoAlarma === true);
@@ -261,10 +261,29 @@ class HoldButton {
     this.startTime = null;
     this.raf = null;
 
-    // Si ya hay una apertura en curso, no dispares otra.
+    // Si ya hay una acción en curso, no dispares otra.
     if (this.sending) return;
     this.sending = true;
+    try {
+      await this._onComplete();
+    } finally {
+      this.sending = false;
+    }
+  }
 
+  // Cada subclase define su acción al completar los 3 s.
+  async _onComplete() {}
+
+  // Destello verde de éxito (~1.5 s) que vuelve solo al estado normal.
+  _flashSuccess(ms = 1500) {
+    this.el.classList.add('btn-success');
+    setTimeout(() => this.el.classList.remove('btn-success'), ms);
+  }
+}
+
+// Puerta / Portón: pulso. Llama al Worker y, si confirma (ok:true), destella verde.
+class DoorButton extends HoldButton {
+  async _onComplete() {
     // 'btn-puerta' → 'puerta', 'btn-porton' → 'porton' (coincide con el id, sin acento).
     const target = this.el.id.replace('btn-', '');
 
@@ -280,20 +299,44 @@ class HoldButton {
       const data = await res.json().catch(() => ({}));
 
       if (data.ok === true) {
+        this._flashSuccess();   // verde SOLO cuando la apertura se confirma
         mostrarToast(EXITO_LABEL[target] || 'Abierto');
       } else {
         mostrarToast('No se pudo abrir, intenta de nuevo');
       }
     } catch (err) {
       mostrarToast('No se pudo abrir, intenta de nuevo');
-    } finally {
-      this.sending = false;
     }
   }
 }
 
-new HoldButton(document.getElementById('btn-puerta'));
-new HoldButton(document.getElementById('btn-porton'));
+// Alarma: interruptor (toggle). Verde PERSISTENTE mientras está activada.
+// Por ahora NO llama al Worker (todavía no hay Shelly físico para la alarma):
+// solo alterna el estado visual. El enganche al Worker queda preparado abajo.
+class AlarmButton extends HoldButton {
+  constructor(el) {
+    super(el);
+    this.activa = false;
+  }
+
+  async _onComplete() {
+    this.activa = !this.activa;
+    this.el.classList.toggle('btn-success', this.activa);   // verde persistente
+    this.el.setAttribute('aria-pressed', String(this.activa));
+    mostrarToast(this.activa ? 'Alarma activada' : 'Alarma desactivada');
+
+    // TODO (cuando exista el Shelly de la alarma): disparar el relé vía Worker.
+    // await fetch(WORKER_URL, {
+    //   method:  'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body:    JSON.stringify({ target: 'alarma', estado: this.activa ? 'on' : 'off' }),
+    // });
+  }
+}
+
+new DoorButton(document.getElementById('btn-puerta'));
+new DoorButton(document.getElementById('btn-porton'));
+new AlarmButton(document.getElementById('btn-alarma'));
 
 // ══════════════════════════════════════════════════════════════════════════════
 // GESTIÓN — Panel admin (master/admin) y "Mis alumnos" (locatario)
