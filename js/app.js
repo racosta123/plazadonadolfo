@@ -109,7 +109,7 @@ async function handleLogin() {
     await signInWithEmailAndPassword(auth, email, password);
     // onAuthStateChanged se encarga de verificar el rol y navegar.
   } catch (err) {
-    setLoginError(authErrorMessage(err.code));
+    setLoginError('Error: ' + (err.code || err.message));
     btnLogin.disabled = false;
   } finally {
     // La contraseña ya se usó: no la conservamos en ningún lado.
@@ -140,6 +140,10 @@ function applyRole(user) {
 }
 
 // ─── Estado de autenticación ──────────────────────────────────────────────────
+// Reintentos de la verificación de la ficha ante fallas de RED (no de permisos).
+const VERIF_MAX_REINTENTOS = 3;     // 1 lectura inicial + hasta 3 reintentos
+const VERIF_ESPERA_MS = 1500;       // espera entre reintentos
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     sessionUser = null;
@@ -152,7 +156,19 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   try {
-    const snap = await getDoc(doc(db, 'usuarios', user.uid));
+    // Lee la ficha del usuario reintentando ante fallas de RED (offline).
+    // Los permisos ('permission-denied') NO se reintentan: van directo al catch.
+    let snap = null;
+    for (let intento = 0; intento <= VERIF_MAX_REINTENTOS; intento++) {
+      try {
+        snap = await getDoc(doc(db, 'usuarios', user.uid));
+        break;                                       // lectura OK
+      } catch (errLectura) {
+        if (errLectura.code === 'permission-denied') throw errLectura;
+        if (intento === VERIF_MAX_REINTENTOS) throw errLectura;   // agotados los reintentos
+        await new Promise(r => setTimeout(r, VERIF_ESPERA_MS));
+      }
+    }
 
     if (!snap.exists()) {
       setLoginError('Tu usuario no está dado de alta. Contacta al administrador.');
@@ -189,9 +205,15 @@ onAuthStateChanged(auth, async (user) => {
     applyRole(sessionUser);
     showScreen('screen-main');
   } catch (err) {
-    // Falla de lectura (reglas / red): no dejamos pasar.
-    setLoginError('No se pudo verificar tu acceso. Intenta de nuevo.');
-    await signOut(auth);
+    if (err.code === 'permission-denied') {
+      // Reglas me rechazan: no puedo verificar el acceso → cierro sesión (fail-closed).
+      setLoginError('No se pudo verificar tu acceso. Intenta de nuevo.');
+      await signOut(auth);
+    } else {
+      // Red/offline tras agotar los reintentos: NO cierro sesión. La dejo viva para
+      // que, al recuperar señal, el usuario entre sin volver a escribir credenciales.
+      setLoginError('Sin conexión estable. Revisa tu internet e intenta de nuevo.');
+    }
   }
 });
 
