@@ -199,12 +199,22 @@ onAuthStateChanged(auth, async (user) => {
 const HOLD_MS = 3000;
 const CIRCUMFERENCE = 2 * Math.PI * 19; // r=19 → 119.38
 
+// Worker de Cloudflare que valida permisos en el servidor y dispara el relé.
+const WORKER_URL = 'https://plazadonadolfo-proxy.acosta4770.workers.dev/';
+
+// Texto del toast de éxito según el objetivo.
+const EXITO_LABEL = {
+  puerta: 'Puerta abierta',
+  porton: 'Portón abierto',
+};
+
 class HoldButton {
   constructor(el) {
     this.el = el;
     this.ring = el.querySelector('.ring-progress');
     this.startTime = null;
     this.raf = null;
+    this.sending = false;          // evita disparos solapados
 
     this.ring.style.strokeDasharray = CIRCUMFERENCE;
     this.ring.style.strokeDashoffset = CIRCUMFERENCE;
@@ -244,17 +254,41 @@ class HoldButton {
     this.raf = null;
   }
 
-  _complete() {
+  async _complete() {
     cancelAnimationFrame(this.raf);
     this.el.classList.remove('holding');
     this.ring.style.strokeDashoffset = CIRCUMFERENCE;
     this.startTime = null;
     this.raf = null;
 
-    // TODO: el siguiente paso reemplaza esta alerta por la llamada al Worker
-    // (que valida permisos + suspensión en el servidor antes de disparar el relé).
-    const label = this.el.dataset.label || 'Abriendo...';
-    setTimeout(() => mostrarToast(label), 50);
+    // Si ya hay una apertura en curso, no dispares otra.
+    if (this.sending) return;
+    this.sending = true;
+
+    // 'btn-puerta' → 'puerta', 'btn-porton' → 'porton' (coincide con el id, sin acento).
+    const target = this.el.id.replace('btn-', '');
+
+    // Feedback inmediato mientras viaja la petición (la red móvil puede tardar).
+    mostrarToast(this.el.dataset.label || 'Abriendo...');
+
+    try {
+      const res  = await fetch(WORKER_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ target }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (data.ok === true) {
+        mostrarToast(EXITO_LABEL[target] || 'Abierto');
+      } else {
+        mostrarToast('No se pudo abrir, intenta de nuevo');
+      }
+    } catch (err) {
+      mostrarToast('No se pudo abrir, intenta de nuevo');
+    } finally {
+      this.sending = false;
+    }
   }
 }
 
