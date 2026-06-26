@@ -15,6 +15,10 @@ service cloud.firestore {
     function puedoInvitarPorton() {
       return meExiste() && miDoc().get('puedeInvitarPorton', false) == true;
     }
+    function puedeArmarAlarma() {
+      return isMaster() || isAdmin()
+          || (meExiste() && miDoc().get('permisoAlarma', false) == true);
+    }
 
     match /usuarios/{uid} {
       allow read: if signedIn() && (
@@ -52,6 +56,21 @@ service cloud.firestore {
     match /aperturas/{id} {
       allow read: if isMaster() || isAdmin();
       allow create, update, delete: if false;
+    }
+
+    match /estado/alarma {
+      // Solo quien puede usar la alarma ve su estado (mismo conjunto que ve el botón).
+      allow read: if puedeArmarAlarma();
+
+      // Crear (primera vez) y actualizar: master, admin o permisoAlarma.
+      // Campos restringidos a los tres; actualizadoPor no se puede falsear.
+      allow create, update: if puedeArmarAlarma()
+        && request.resource.data.keys().hasOnly(['activa','actualizadoPor','actualizadoEn'])
+        && request.resource.data.activa is bool
+        && request.resource.data.actualizadoPor == request.auth.uid;
+
+      // El doc de estado no se borra nunca.
+      allow delete: if false;
     }
   }
 }

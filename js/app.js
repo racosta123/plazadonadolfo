@@ -133,7 +133,10 @@ function applyRole(user) {
   // master/admin SIEMPRE ven los tres accesos.
   btnPuerta.hidden = !(esMA || user.permisoPuerta === true);
   rowPorton.hidden = !(esMA || user.permisoPorton === true);
-  rowAlarma.hidden = !(esMA || user.permisoAlarma === true);
+  const puedeAlarma = esMA || user.permisoAlarma === true;
+  rowAlarma.hidden = !puedeAlarma;
+  if (puedeAlarma) startAlarmaListener();
+  else { stopAlarmaListener(); alarmaBtn.render(false); }
   // Accesos a paneles de gestión.
   btnAdmin.hidden      = !esMA;
   btnMisAlumnos.hidden = !(user.rol === 'locatario');
@@ -149,6 +152,7 @@ onAuthStateChanged(auth, async (user) => {
     sessionUser = null;
     stopAdminListener();
     stopAlumnosListener();
+    stopAlarmaListener();
     closeAllModals();
     btnLogin.disabled = false;
     showScreen('screen-login');
@@ -217,8 +221,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ─── Mantener presionado (3 s) ────────────────────────────────────────────────
-const HOLD_MS = 3000;
+// ─── Mantener presionado ──────────────────────────────────────────────────────
 const CIRCUMFERENCE = 2 * Math.PI * 19; // r=19 → 119.38
 
 // Worker de Cloudflare que valida permisos en el servidor y dispara el relé.
@@ -233,6 +236,7 @@ const EXITO_LABEL = {
 class HoldButton {
   constructor(el) {
     this.el = el;
+    this.holdMs = Number(el.dataset.hold) || 3000;
     this.ring = el.querySelector('.ring-progress');
     this.startTime = null;
     this.raf = null;
@@ -257,7 +261,7 @@ class HoldButton {
   }
 
   _tick() {
-    const progress = Math.min((performance.now() - this.startTime) / HOLD_MS, 1);
+    const progress = Math.min((performance.now() - this.startTime) / this.holdMs, 1);
     this.ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
 
     if (progress < 1) {
@@ -332,33 +336,65 @@ class DoorButton extends HoldButton {
   }
 }
 
-// Alarma: interruptor (toggle). Verde PERSISTENTE mientras está activada.
-// Por ahora NO llama al Worker (todavía no hay Shelly físico para la alarma):
-// solo alterna el estado visual. El enganche al Worker queda preparado abajo.
+// Alarma: interruptor (toggle) con estado COMPARTIDO en Firestore (estado/alarma).
+// El servidor es la fuente de verdad: _onComplete escribe el nuevo estado y el
+// onSnapshot (más abajo) pinta/despinta el verde en todos los dispositivos.
+// Sigue sin llamar al Worker (no hay Shelly físico de alarma todavía).
 class AlarmButton extends HoldButton {
   constructor(el) {
     super(el);
-    this.activa = false;
+    this.activa = false;   // último estado conocido del servidor
   }
 
+  // Refleja el estado recibido del servidor (lo invoca el onSnapshot).
+  render(activa) {
+    this.activa = activa;
+    this.el.classList.toggle('btn-success', activa);   // verde persistente
+    this.el.setAttribute('aria-pressed', String(activa));
+  }
+
+  // Al completar el hold de 3 s: invierte el estado y lo escribe en Firestore.
+  // No pintamos aquí: lo pinta el onSnapshot (con latency-compensation se ve al instante).
   async _onComplete() {
-    this.activa = !this.activa;
-    this.el.classList.toggle('btn-success', this.activa);   // verde persistente
-    this.el.setAttribute('aria-pressed', String(this.activa));
-    mostrarToast(this.activa ? 'Alarma activada' : 'Alarma desactivada');
+    const nuevo = !this.activa;
+    try {
+      await setDoc(doc(db, 'estado', 'alarma'), {
+        activa: nuevo,
+        actualizadoPor: auth.currentUser.uid,
+        actualizadoEn: serverTimestamp()
+      });
+      mostrarToast(nuevo ? 'Alarma activada' : 'Alarma desactivada');
+    } catch (err) {
+      mostrarToast('No se pudo cambiar la alarma: ' + (err.code || err.message));
+    }
 
     // TODO (cuando exista el Shelly de la alarma): disparar el relé vía Worker.
-    // await fetch(WORKER_URL, {
-    //   method:  'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body:    JSON.stringify({ target: 'alarma', estado: this.activa ? 'on' : 'off' }),
-    // });
+    // await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+    //   body: JSON.stringify({ target:'alarma', estado: nuevo ? 'on' : 'off' }) });
   }
 }
 
 new DoorButton(document.getElementById('btn-puerta'));
 new DoorButton(document.getElementById('btn-porton'));
-new AlarmButton(document.getElementById('btn-alarma'));
+const alarmaBtn = new AlarmButton(document.getElementById('btn-alarma'));
+
+// Estado compartido de la alarma (Firestore: estado/alarma). Mismo molde
+// listener+unsubscribe que la lista de alumnos.
+let unsubAlarma = null;
+function startAlarmaListener() {
+  if (unsubAlarma) return;
+  unsubAlarma = onSnapshot(
+    doc(db, 'estado', 'alarma'),
+    (snap) => {
+      const activa = snap.exists() && snap.data().activa === true;
+      alarmaBtn.render(activa);
+    },
+    () => { /* sin permiso o red caída: dejamos el botón como esté, sin romper la UI */ }
+  );
+}
+function stopAlarmaListener() {
+  if (unsubAlarma) { unsubAlarma(); unsubAlarma = null; }
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // GESTIÓN — Panel admin (master/admin) y "Mis alumnos" (locatario)
