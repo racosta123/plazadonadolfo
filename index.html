@@ -406,6 +406,45 @@
     </div>
   </div>
 
+  <!-- ░░ MODAL — EDITAR USUARIO (solo master) ░░ -->
+  <div class="modal-overlay" id="modal-editar" hidden>
+    <div class="modal-card">
+      <h2 class="modal-title">Editar usuario</h2>
+      <p class="modal-text" id="ed-nombre"></p>
+      <div class="switch-group">
+        <p class="field-label">Accesos</p>
+        <label class="switch-row">
+          <span class="switch-text">Puerta peatonal</span>
+          <span class="switch"><input type="checkbox" id="ed-puerta"><span class="switch-slider"></span></span>
+        </label>
+        <label class="switch-row">
+          <span class="switch-text">Portón vehicular</span>
+          <span class="switch"><input type="checkbox" id="ed-porton"><span class="switch-slider"></span></span>
+        </label>
+        <label class="switch-row">
+          <span class="switch-text">Alarma</span>
+          <span class="switch"><input type="checkbox" id="ed-alarma"><span class="switch-slider"></span></span>
+        </label>
+        <label class="switch-row switch-row--sep">
+          <span class="switch-text">Puede invitar portón</span>
+          <span class="switch"><input type="checkbox" id="ed-invitar"><span class="switch-slider"></span></span>
+        </label>
+      </div>
+      <div class="input-group">
+        <label for="ed-rol">Rol</label>
+        <select id="ed-rol">
+          <option value="admin">Admin</option>
+          <option value="locatario">Locatario</option>
+          <option value="alumno">Alumno</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="ed-cancelar">Cancelar</button>
+        <button type="button" class="btn-enter" id="ed-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ░░ AVISO DE INSTALACIÓN PWA ░░ -->
   <div class="install-banner" id="install-banner" hidden>
     <div class="install-banner-text">

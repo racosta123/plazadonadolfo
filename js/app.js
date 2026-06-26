@@ -472,6 +472,17 @@ const vigGuardar    = document.getElementById('vig-guardar');
 const vigQuitar     = document.getElementById('vig-quitar');
 const vigCancelar   = document.getElementById('vig-cancelar');
 
+// ─── Refs: modal editar usuario (solo master) ──────────────────────────────────
+const modalEditar = document.getElementById('modal-editar');
+const edNombre    = document.getElementById('ed-nombre');
+const edPuerta    = document.getElementById('ed-puerta');
+const edPorton    = document.getElementById('ed-porton');
+const edAlarma    = document.getElementById('ed-alarma');
+const edInvitar   = document.getElementById('ed-invitar');
+const edRol       = document.getElementById('ed-rol');
+const edGuardar   = document.getElementById('ed-guardar');
+const edCancelar  = document.getElementById('ed-cancelar');
+
 // ─── Refs: modal confirmación (genérico, reemplaza el confirm() nativo) ─────────
 const modalConfirm = document.getElementById('modal-confirm');
 const confirmTitle = document.getElementById('confirm-title');
@@ -484,7 +495,7 @@ let   confirmResolver = null;
 function openModal(el)  { if (el) el.hidden = false; }
 function closeModal(el) { if (el) el.hidden = true; }
 function closeAllModals() {
-  [modalCrear, modalAlumno, modalExito, modalVigencia, modalConfirm].forEach(m => { if (m) m.hidden = true; });
+  [modalCrear, modalAlumno, modalExito, modalVigencia, modalConfirm, modalEditar].forEach(m => { if (m) m.hidden = true; });
   if (confirmResolver) { confirmResolver(false); confirmResolver = null; }
 }
 
@@ -708,6 +719,13 @@ function buildAdminCard(u) {
     b.addEventListener('click', () => borrarUsuario(u));
     actions.appendChild(b);
   }
+  if (iAmMaster) {
+    const b = document.createElement('button');
+    b.className = 'btn-row';
+    b.textContent = 'Editar';
+    b.addEventListener('click', () => openEditar(u));
+    actions.appendChild(b);
+  }
   if (actions.children.length) card.appendChild(actions);
 
   return card;
@@ -729,6 +747,30 @@ async function borrarUsuario(u) {
     mostrarToast('No se pudo borrar: ' + (err.code || err.message));
   }
 }
+
+// ─── Editar usuario (solo master) ──────────────────────────────────────────────
+function openEditar(u) {
+  edNombre.textContent  = u.nombre || '';
+  edPuerta.checked      = !!u.permisoPuerta;
+  edPorton.checked      = !!u.permisoPorton;
+  edAlarma.checked      = !!u.permisoAlarma;
+  edInvitar.checked     = !!u.puedeInvitarPorton;
+  edRol.value           = u.rol || 'alumno';
+  edGuardar.onclick = async () => {
+    await safeUpdate(u.uid, {
+      permisoPuerta:      edPuerta.checked,
+      permisoPorton:      edPorton.checked,
+      permisoAlarma:      edAlarma.checked,
+      puedeInvitarPorton: edInvitar.checked,
+      rol:                edRol.value
+    });
+    closeModal(modalEditar);
+    mostrarToast('Usuario actualizado');
+  };
+  openModal(modalEditar);
+}
+edCancelar.addEventListener('click', () => closeModal(modalEditar));
+modalEditar.addEventListener('click', (e) => { if (e.target === modalEditar) closeModal(modalEditar); });
 
 // ─── Crear usuario (admin) ──────────────────────────────────────────────────────
 function fillRolDropdown() {

@@ -1,4 +1,4 @@
-const CACHE = 'plaza-don-adolfo-v6';
+const CACHE = 'plaza-don-adolfo-v7';
 const PRECACHE = ['./', './index.html', './css/styles.css', './js/app.js', './manifest.json', './img/icon-192.png', './img/icon-512.png'];
 
 self.addEventListener('install', e => {
